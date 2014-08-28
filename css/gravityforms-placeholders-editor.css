@@ -1,0 +1,32 @@
+#field_settings ul li.field_label_visible_setting label.inline {
+	margin: 0 0 4px 4px;
+}
+
+#field_settings ul li.field_setting input.large {
+	width: 375px;
+}
+
+#field_settings ul li.label_setting #label_visible_setting_container {
+	margin-top: 5px;
+}
+
+#field_settings ul li .ginput_complex {
+	width: 375px;
+}
+
+#field_settings ul li .ginput_complex .ginput_left {
+	padding-right:5px;
+}
+
+#field_settings ul li .ginput_complex .ginput_right {
+	padding-left:5px;
+}
+
+#field_settings ul li .ginput_complex label {
+	margin: 4px 0;
+}
+
+#field_settings ul li .ginput_complex .ginput_left input.placeholder_name_first,
+#field_settings ul li .ginput_complex .ginput_right input.placeholder_name_last {
+	width:100% !important;
+}
