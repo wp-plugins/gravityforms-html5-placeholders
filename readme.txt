@@ -13,9 +13,14 @@ This plugin adds native HTML5 placeholder support to Gravity Forms' fields with 
 
 Adds fully customizable native HTML5 placeholder support to the Gravity Forms plugin extending the Gravity Forms form editor. It allows you to define placeholders for both standard and advanced fields and full customization of labels and sublabels. Javascript fallback is used for old browsers that don't support the HTML5 placeholder attribute.
 
-Notes:
+=Supported Standard Fields:=
+* Single Line Text, * Paragraph Text
 
-Requires Gravity Forms plugin ver. 1.7 and above
+=Supported Advanced Fields:=
+* Name, * Email, * Phone, * Website
+
+=Requirements:=
+Requires [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above
 
 == Installation ==
 
