@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.3
+Stable tag: 2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,9 @@ Adds fully customizable native HTML5 placeholder support to the Gravity Forms pl
 
 =Supported Advanced Fields:=
 * Name, * Email, * Phone, * Website
+
+=Supported Post Fields:=
+* Post Title, * Post Content, * Post Excerpt
 
 =Requirements:=
 Requires [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above

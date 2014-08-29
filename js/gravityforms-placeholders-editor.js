@@ -112,12 +112,15 @@
  	GFViews.PlaceholderSettingEditor = GFViews.FieldSettingEditor.extend({
  		el: 'li.placeholder_setting.field_setting',
  		fieldSettingClass : 'placeholder_setting',
- 		fieldTypesSupported : [ 'text', 'textarea', 'phone','website' ],
+ 		fieldTypesSupported : [ 'text', 'textarea', 'phone', 'website', 'post_title', 'post_content', 'post_excerpt' ],
  		events: {
-			'keyup input#placeholder_text' 			: 'inputPlaceholderOnKeyUp',
-			'keyup input#placeholder_phone' 		: 'inputPlaceholderOnKeyUp',
-			'keyup input#placeholder_website' 		: 'inputPlaceholderOnKeyUp',
-			'keyup textarea#placeholder_textarea' 	: 'inputPlaceholderOnKeyUp',
+			'keyup input#placeholder_text' 				: 'inputPlaceholderOnKeyUp',
+			'keyup input#placeholder_phone' 			: 'inputPlaceholderOnKeyUp',
+			'keyup input#placeholder_website' 			: 'inputPlaceholderOnKeyUp',
+			'keyup input#placeholder_post_title' 		: 'inputPlaceholderOnKeyUp',
+			'keyup textarea#placeholder_textarea' 		: 'inputPlaceholderOnKeyUp',
+			'keyup textarea#placeholder_post_content' 	: 'inputPlaceholderOnKeyUp',
+			'keyup textarea#placeholder_post_excerpt' 	: 'inputPlaceholderOnKeyUp',
  		},
  		initialize: function(){
 

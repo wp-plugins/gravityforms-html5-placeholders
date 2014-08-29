@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms HTML5 Placeholders
 Plugin URI: http://www.isoftware.gr/wordpress/plugins/gravityforms-html5-placeholders
 Description: Adds native HTML5 placeholder support to Gravity Forms' fields with javascript fallback. Javascript & jQuery are required.
-Version: 2.3
+Version: 2.4
 Author: iSoftware
 Author URI: http://www.isoftware.gr
 
@@ -29,7 +29,7 @@ if (!class_exists('GFHtml5Placeholders')):
 
 class GFHtml5Placeholders {
 
-	protected $_version = "2.3";
+	protected $_version = "2.4";
 	protected $_min_gravityforms_version = "1.7";
 	protected $_slug = "html5_placeholders";
 	protected $_full_path = __FILE__;
@@ -286,8 +286,13 @@ class GFHtml5Placeholders {
 			$field_keys[] = "placeholderNameLast";
 			$field_keys[] = "placeholderNameSuffix";
 
+			// Export our label field keys for translation
 			$field_keys[] = "labelEnterEmail";
 			$field_keys[] = "labelConfirmEmail";
+			$field_keys[] = "labelNamePrefix";
+			$field_keys[] = "labelNameFirst";
+			$field_keys[] = "labelNameLast";
+			$field_keys[] = "labelNameSuffix";
 
 		}
 		return $field_keys;
@@ -341,9 +346,12 @@ class GFHtml5Placeholders {
 			case 'textarea':
 			case 'phone':
 			case 'website':
+			case 'post_title':
+			case 'post_content':
+			case 'post_excerpt':
 
 				if( isset($field['placeholder']) && !empty($field['placeholder']) ){
-					$lookup_type = $field_type == 'textarea' ? 'textarea' : 'input' ;
+					$lookup_type = ( 'textarea' === $field_type || 'post_content' === $field_type  || 'post_excerpt' === $field_type  ) ? 'textarea' : 'input' ;
 					if( $input = (( $result = $xpath->query("//{$lookup_type}[@id='{$field_uid}']")) ? $result->item(0) : null )){
 						$input->setAttribute('placeholder', esc_attr($field['placeholder']));
 					}

@@ -1,8 +1,8 @@
 <li class="placeholder_setting field_setting" style="display:none">
 	<script type="text/html" id="tmpl-gf-placeholder-setting">
 		<label for="placeholder_<%= field.type %>" ><?php echo $this->_strings->placeholder->name ?> <?php gform_tooltip( $this->_strings->placeholder->tooltip ); ?></label>
-		<% if (field.type && field.type == "textarea") { %>
-			<textarea id="placeholder_<%= field.type %>" class="<%=field.size%>" value="<%= field.placeholder %>" />
+		<% if (field.type && ( field.type == "textarea" || field.type == "post_content" || field.type == "post_excerpt")) { %>
+			<textarea id="placeholder_<%= field.type %>" class="<%=field.size%> fieldwidth-3" ><%= field.placeholder %></textarea>
 		<% } else { %>
 			<input type="text" id="placeholder_<%= field.type %>" class="<%= field.size %>" value="<%= field.placeholder %>" />
 		<% } %>
