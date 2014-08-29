@@ -47,5 +47,8 @@ This plugin requires prior installation and activation of [Gravity Forms](http:/
 
 == Changelog ==
 
+= 2.4 =
+* Added support for Post Title, Post Content and Post Excerpt fields
+
 = 2.3 =
 * Initial WordPress.org Release
