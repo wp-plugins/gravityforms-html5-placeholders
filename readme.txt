@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: isoftware
-Tags: forms, gravity, gravityforms, html5, jquery.placeholders.js, placeholders, wpml
+Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
 Stable tag: 2.4
