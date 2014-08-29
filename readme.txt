@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: isoftware
-Tags: forms, gravity, gravityforms, html5, jquery.placeholders.js, placeholders
+Tags: forms, gravity, gravityforms, html5, jquery.placeholders.js, placeholders, wpml
 Requires at least: 3.5
 Tested up to: 4.0
 Stable tag: 2.4
@@ -11,7 +11,13 @@ This plugin adds native HTML5 placeholder support to Gravity Forms' fields with 
 
 == Description ==
 
-Adds fully customizable native HTML5 placeholder support to the Gravity Forms plugin extending the Gravity Forms form editor. It allows you to define placeholders for both standard and advanced fields and full customization of labels and sublabels. Javascript fallback is used for old browsers that don't support the HTML5 placeholder attribute.
+The plugin extends the default Gravity Forms form editor to support native HTML5 placeholders and label management.
+
+It allows you to define placeholders for a wide variety of build-in fields and to customize field labels & sublabels by either overriding the default with your own and/or allowing you to hide them individually.  
+ 
+Javascript fallback is used for old browsers that don't support the HTML5 placeholder attribute.
+
+It is fully compatible with WPML for placeholder and label translation using the Gravity Forms Multilingual plugin. 
 
 = Supported Standard Fields =
 * Single Line Text
