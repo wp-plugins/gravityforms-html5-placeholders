@@ -241,7 +241,7 @@ class GFHtml5Placeholders {
         // Add support for minified scripts
         $suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-        wp_register_script('gravityforms-placeholders-fallback', $this->get_base_url() . "/js/gravityforms-placeholders-fallback." . $suffix . "js",   array( 'jquery' ), $this->_version, false );
+        wp_register_script('gravityforms-placeholders-fallback', $this->get_base_url() . "/js/gravityforms-placeholders-fallback" . $suffix . ".js",   array( 'jquery' ), $this->_version, false );
         wp_enqueue_script('gravityforms-placeholders-fallback');
 
     }

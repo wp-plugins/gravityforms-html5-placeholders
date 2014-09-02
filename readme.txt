@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.5
+Stable tag: 2.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,9 @@ This plugin requires prior installation and activation of [Gravity Forms](http:/
 4. Editing an International Address Field
 
 == Changelog ==
+
+= 2.5.1 =
+* Fixed fallback script loading error
 
 = 2.5 =
 * Added support for Address, Date, Time and Number fields
