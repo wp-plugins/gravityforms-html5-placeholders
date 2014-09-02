@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.4
+Stable tag: 2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,12 +22,16 @@ It is fully compatible with WPML for placeholder and label translation using the
 = Supported Standard Fields =
 * Single Line Text
 * Paragraph Text
+* Number
 
 = Supported Advanced Fields =
 * Name
 * Email
 * Phone
 * Website
+* Address
+* Date
+* Time
 
 = Supported Post Fields =
 * Post Title
@@ -50,8 +54,17 @@ This plugin requires prior installation and activation of [Gravity Forms](http:/
 1. Editing a Simple Name Field
 2. Editing an Extended Name Field
 3. Editing an Email Field with confirmation
+4. Editing an International Address Field
 
 == Changelog ==
+
+= 2.5 =
+* Added support for Address, Date, Time and Number fields
+* Simplified complex fields placeholder and sublabels editor
+* Fixed section break field label visibility
+* Fixed name field label placeholder not rendering when nameFormat empty
+* Fixed field label hidden css to allow for margin
+* Added minified versions of scripts 
 
 = 2.4 =
 * Added support for Post Title, Post Content and Post Excerpt fields

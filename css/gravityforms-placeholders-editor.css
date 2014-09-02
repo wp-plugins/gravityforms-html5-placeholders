@@ -1,32 +1,52 @@
+div.gfield_admin_icons {
+    margin-bottom: 8px;
+}
+
 #field_settings ul li.field_label_visible_setting label.inline {
-	margin: 0 0 4px 4px;
+    margin: 0 0 4px 4px;
 }
 
 #field_settings ul li.field_setting input.large {
-	width: 375px;
+    width: 375px;
 }
 
 #field_settings ul li.label_setting #label_visible_setting_container {
-	margin-top: 5px;
+    margin-top: 5px;
 }
 
 #field_settings ul li .ginput_complex {
-	width: 375px;
+    width: 375px;
 }
 
 #field_settings ul li .ginput_complex .ginput_left {
-	padding-right:5px;
+    padding-right:5px;
 }
 
 #field_settings ul li .ginput_complex .ginput_right {
-	padding-left:5px;
+    padding-left:5px;
 }
 
 #field_settings ul li .ginput_complex label {
-	margin: 4px 0;
+    margin: 4px 0;
 }
 
 #field_settings ul li .ginput_complex .ginput_left input.placeholder_name_first,
 #field_settings ul li .ginput_complex .ginput_right input.placeholder_name_last {
-	width:100% !important;
+    width:100% !important;
+}
+
+#field_settings .field_setting_table {
+    width: 375px;
+}
+
+#field_settings .field_setting_table .field_setting_field_col,
+#field_settings .field_setting_table .field_setting_value_col,
+#field_settings .field_setting_table .placeholder_setting_label,
+#field_settings .field_setting_table .placeholder_setting_value {
+    width: 50%;
+}
+
+#field_settings .field_setting_table .placeholder_setting_value input,
+#field_settings .field_setting_table .sublabel_setting_value input {
+    width: 100%;
 }
