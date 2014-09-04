@@ -1,3 +1,4 @@
+/* global _gfPlaceholdersEditorL10n */
 /*!
  * Gravity Forms HTML5 Placeholders Editor Script
  * Adds native HTML5 placeholder support to Gravity Forms' fields using Backbone
@@ -14,7 +15,13 @@
     wp.GravityForms.Editor = wp.GravityForms.Editor || {};
     wp.GravityForms.Editor.FieldSettings = wp.GravityForms.Editor.FieldSettings || {};
     wp.GravityForms.Editor.Events = wp.GravityForms.Editor.Events || _.extend({}, Backbone.Events);
+    
+    // Create variables
     var GFViews = wp.GravityForms.Editor.FieldSettingsViews = wp.GravityForms.Editor.FieldSettingsViews || {};
+    
+    var GFSettings = wp.GravityForms.Settings = _gfPlaceholdersEditorL10n.settings || {
+        is_gravityforms_html5_enabled : false,
+    };
 
     GFViews.FieldSettingEditor = Backbone.View.extend({
         fieldSettingClass : null,
@@ -116,6 +123,32 @@
         },
     });
     
+    // Rules Setting
+    GFViews.RulesSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.rules_setting.field_setting',
+        fieldSettingClass: 'rules_setting',
+        fieldTypesSupported : [], // will be configured in the initialize function
+        renderEnabled : false,
+        events: {
+            'click input#field_required' : 'inputFieldRequiredOnClick'
+        },
+        initialize: function(){
+            
+            // Get all the types that support the label_setting
+            for( fieldType in fieldSettings ){
+                if (String(fieldSettings[fieldType]).indexOf(".rules_setting") !== -1)
+                    this.fieldTypesSupported.push( fieldType );
+            }
+
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+        },
+        // Events
+        inputFieldRequiredOnClick : function( e ) {
+            $('.field_selected' ).toggleClass( 'gfield_contains_required', e.currentTarget.checked );
+            wp.GravityForms.Editor.Events.trigger("inputFieldRequiredOnClick", e );
+        },
+    });
+
     // Placeholder Setting
     GFViews.PlaceholderSettingEditor = GFViews.FieldSettingEditor.extend({
         el: 'li.placeholder_setting.field_setting',
@@ -557,6 +590,7 @@
         inputLabelVisibleOnClick : function( e ) {
             SetFieldProperty('labelVisible', e.currentTarget.checked );
             var field = GetSelectedField();
+            $('.field_selected' ).toggleClass( 'gfield_label_hidden', e.currentTarget.checked === false );
             if( 'section' === field.type) {
                 $('.field_selected h2.gsection_title').toggle( e.currentTarget.checked );
             } else {
@@ -1022,17 +1056,22 @@
 
         // Build-in Settings
         wp.GravityForms.Editor.FieldSettings['emailConfirm']        = new GFViews.EmailConfirmSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['rules']               = new GFViews.RulesSettingEditor();
         wp.GravityForms.Editor.FieldSettings['address']             = new GFViews.AddressSettingEditor();
         wp.GravityForms.Editor.FieldSettings['dateInputType']       = new GFViews.DateInputTypeSettingEditor();
 
-        // Placeholder Settings
-        wp.GravityForms.Editor.FieldSettings['placeholder']         = new GFViews.PlaceholderSettingEditor();
-        wp.GravityForms.Editor.FieldSettings['placeholderEmail']    = new GFViews.PlaceholderEmailSettingEditor();
-        wp.GravityForms.Editor.FieldSettings['placeholderName']     = new GFViews.PlaceholderNameSettingEditor();
-        wp.GravityForms.Editor.FieldSettings['placeholderAddress']  = new GFViews.PlaceholderAddressSettingEditor();
-        wp.GravityForms.Editor.FieldSettings['placeholderDate']     = new GFViews.PlaceholderDateSettingEditor();
-        wp.GravityForms.Editor.FieldSettings['placeholderTime']     = new GFViews.PlaceholderTimeSettingEditor();
+        if ( GFSettings.is_gravityforms_html5_enabled ) {
 
+            // Placeholder Settings
+            wp.GravityForms.Editor.FieldSettings['placeholder']         = new GFViews.PlaceholderSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderEmail']    = new GFViews.PlaceholderEmailSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderName']     = new GFViews.PlaceholderNameSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderAddress']  = new GFViews.PlaceholderAddressSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderDate']     = new GFViews.PlaceholderDateSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderTime']     = new GFViews.PlaceholderTimeSettingEditor();
+        
+        }
+        
         // Label Settings
         wp.GravityForms.Editor.FieldSettings['labelVisible']        = new GFViews.LabelVisibleSettingEditor();
         wp.GravityForms.Editor.FieldSettings['emailLabel']          = new GFViews.EmailLabelSettingEditor();

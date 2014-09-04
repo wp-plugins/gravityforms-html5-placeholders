@@ -1,7 +1,7 @@
 <li class="placeholder_email_setting field_setting" style="display:none">
     <script type="text/html" id="tmpl-gf-placeholder-email-setting">
     <% if ( field.emailConfirmEnabled === false ) { %>
-        <div class="ginput_container ginput_placeholder_email_simple">
+        <div class="placeholder_email_container ginput_placeholder_email_simple">
             <label>
                 <?php echo $this->_strings->placeholders->singular->name ?>
                 <?php gform_tooltip( $this->_strings->placeholders->singular->tooltip ); ?>

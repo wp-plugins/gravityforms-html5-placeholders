@@ -1,7 +1,7 @@
 <li class="placeholder_date_setting field_setting" style="display:none">
     <script type="text/html" id="tmpl-gf-placeholder-date-setting">
     <% if ( 'datepicker' === field.dateType ) { %>
-        <div class="ginput_container ginput_placeholder_email_simple">
+        <div class="placeholder_date_container ginput_placeholder_email_simple">
             <label>
                 <?php echo $this->_strings->placeholders->singular->name ?>
                 <?php gform_tooltip( $this->_strings->placeholders->singular->tooltip ); ?>
