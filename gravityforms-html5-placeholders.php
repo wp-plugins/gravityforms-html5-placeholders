@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms HTML5 Placeholders
 Plugin URI: http://www.isoftware.gr/wordpress/plugins/gravityforms-html5-placeholders
 Description: Adds native HTML5 placeholder support to Gravity Forms' fields with javascript fallback. Javascript & jQuery are required.
-Version: 2.6
+Version: 2.7
 Author: iSoftware
 Author URI: http://www.isoftware.gr
 
@@ -29,7 +29,7 @@ if (!class_exists('GFHtml5Placeholders')):
 
 class GFHtml5Placeholders {
 
-    protected $_version = "2.6";
+    protected $_version = "2.7";
     protected $_min_gravityforms_version = "1.7";
     protected $_slug = "html5_placeholders";
     protected $_full_path = __FILE__;
@@ -322,7 +322,7 @@ class GFHtml5Placeholders {
     public function field_standard_settings( $position , $form_id ){
 
         // Put our field settings right after the Field Label
-        if ( $position == 25 ) {
+        if ( $position == 0 ) {
             
             global $GFCommon;
 
@@ -345,6 +345,9 @@ class GFHtml5Placeholders {
             $this->get_template_part( 'gf-address-placeholder-setting.tmpl.php' , array('form_id' => $form_id, 'addressTypes' => GFCommon::get_address_types($form_id) ) , true );
             $this->get_template_part( 'gf-date-placeholder-setting.tmpl.php' , null , true );
             $this->get_template_part( 'gf-time-placeholder-setting.tmpl.php' , null , true );
+
+            // Add placeholder support for pricing field types
+            $this->get_template_part( 'gf-product-placeholder-setting.tmpl.php', null, true );
 
         }
     
@@ -454,8 +457,7 @@ class GFHtml5Placeholders {
         // Current Field Attributes
         $form_id = $field['formId'];
         $field_id = $field['id'];
-        $field_type = $field['type'];
-
+        $input_type = isset($field['inputType']) && !empty($field['inputType']) ? $field['inputType'] : $field['type'];
         $field_uid = $this->is_form_editor() ? "input_{$field_id}" : "input_{$form_id}_{$field_id}";
 
         // Flag to check whether to process field placeholders
@@ -482,7 +484,7 @@ class GFHtml5Placeholders {
 
         // Process Field Label Replacements
         if( isset($field['labelVisible']) && $field['labelVisible'] == false ) {
-            if( 'section' === $field_type ){
+            if( 'section' === $input_type ){
                 if( $h2 = (( $result = $xpath->query("//h2[contains(@class,'gsection_title')]")) ? $result->item(0) : null ) ){
                     $styles = $h2->getAttribute('style');
                     $h2->setAttribute('style', trim("{$styles} display:none;"));
@@ -495,27 +497,18 @@ class GFHtml5Placeholders {
             }
         }
 
-        // if( isset($field['labelVisible']) && $field['labelVisible'] == false && isset($field['isRequired']) && $field['isRequired']){
-        //     if( $container = (( $result = $xpath->query("//div[@class='ginput_container']")) ? $result->item(0) : null )){
-        //         $span = $doc->createElement('span');
-        //         $span->setAttribute('class', 'gfield_required' );
-        //         $span->nodeValue = '*';
-        //         $container->appendChild($span);
-        //     }
-        // }
-
-        switch( $field_type ){
+        switch( $input_type ){
             case 'text':
             case 'textarea':
             case 'phone':
             case 'website':
             case 'number':
+            case 'price':
             case 'post_title':
             case 'post_content':
             case 'post_excerpt':
-                
-                $lookup_type = ( 'textarea' === $field_type || 'post_content' === $field_type  || 'post_excerpt' === $field_type  ) ? 'textarea' : 'input' ;
-                
+
+                $lookup_type = ( 'textarea' === $input_type || 'post_content' === $input_type  || 'post_excerpt' === $input_type  ) ? 'textarea' : 'input' ;
                 if( $process_placeholders && isset($field['placeholder']) && !empty($field['placeholder']) ){
                     if( $input = (( $result = $xpath->query("//{$lookup_type}[@id='{$field_uid}']")) ? $result->item(0) : null )){
                         $input->setAttribute('placeholder', esc_attr($field['placeholder']));
@@ -538,7 +531,7 @@ class GFHtml5Placeholders {
 
                 if( isset($field['labelEnterEmail']) ) {
                     if( $label = (( $result = $xpath->query("//label[@for='{$field_uid}' and not(contains(@class,'gfield_label'))]")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelEnterEmail'];
+                        $label->nodeValue = esc_html($field['labelEnterEmail']);
                     }
                 }
                 if( isset($field['labelEnterEmailVisible']) && $field['labelEnterEmailVisible'] == false ) {
@@ -558,7 +551,7 @@ class GFHtml5Placeholders {
                     }
                     if( isset($field['labelConfirmEmail']) ) {
                         if( $label = (( $result = $xpath->query("//label[@for='{$field_uid}_2']")) ? $result->item(0) : null ) ){
-                            $label->nodeValue = $field['labelConfirmEmail'];
+                            $label->nodeValue = esc_html($field['labelConfirmEmail']);
                         }
                     }
                     if( isset($field['labelConfirmEmailVisible']) && $field['labelConfirmEmailVisible'] == false ) {
@@ -596,7 +589,7 @@ class GFHtml5Placeholders {
                             }
                             if( isset($field['labelNamePrefix']) ) {
                                 if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_2_container']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelNamePrefix'];
+                                    $label->nodeValue = esc_html($field['labelNamePrefix']);
                                 }
                             }
                             if( isset($field['labelNamePrefixVisible']) && $field['labelNamePrefixVisible'] == false ) {
@@ -615,7 +608,7 @@ class GFHtml5Placeholders {
                         }
                         if( isset($field['labelNameFirst']) ) {
                             if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_3_container']/label")) ? $result->item(0) : null ) ){
-                                $label->nodeValue = $field['labelNameFirst'];
+                                $label->nodeValue = esc_html($field['labelNameFirst']);
                             }
                         }
                         if( isset($field['labelNameFirstVisible']) && $field['labelNameFirstVisible'] == false ) {
@@ -633,7 +626,7 @@ class GFHtml5Placeholders {
                         }
                         if( isset($field['labelNameLast']) ) {
                             if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_6_container']/label")) ? $result->item(0) : null ) ){
-                                $label->nodeValue = $field['labelNameLast'];
+                                $label->nodeValue = esc_html($field['labelNameLast']);
                             }
                         }
                         if( isset($field['labelNameLastVisible']) && $field['labelNameLastVisible'] == false ) {
@@ -653,7 +646,7 @@ class GFHtml5Placeholders {
                             }
                             if( isset($field['labelNameSuffix']) ) {
                                 if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_8_container']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelNameSuffix'];
+                                    $label->nodeValue = esc_html($field['labelNameSuffix']);
                                 }
                             }
                             if( isset($field['labelNameSuffixVisible']) && $field['labelNameSuffixVisible'] == false ) {
@@ -680,7 +673,7 @@ class GFHtml5Placeholders {
                 }
                 if( isset($field['labelAddressStreet']) ) {
                     if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_1_container']/label")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelAddressStreet'];
+                        $label->nodeValue = esc_html($field['labelAddressStreet']);
                     }
                 }
                 if( isset($field['labelAddressStreetVisible']) && $field['labelAddressStreetVisible'] == false ) {
@@ -699,7 +692,7 @@ class GFHtml5Placeholders {
                     }
                     if( isset($field['labelAddressStreet2']) ) {
                         if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_2_container']/label")) ? $result->item(0) : null ) ){
-                            $label->nodeValue = $field['labelAddressStreet2'];
+                            $label->nodeValue = esc_html($field['labelAddressStreet2']);
                         }
                     }
                     if( isset($field['labelAddressStreet2Visible']) && $field['labelAddressStreet2Visible'] == false ) {
@@ -718,7 +711,7 @@ class GFHtml5Placeholders {
                 }
                 if( isset($field['labelAddressCity']) ) {
                     if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_3_container']/label")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelAddressCity'];
+                        $label->nodeValue = esc_html($field['labelAddressCity']);
                     }
                 }
                 if( isset($field['labelAddressCityVisible']) && $field['labelAddressCityVisible'] == false ) {
@@ -743,7 +736,7 @@ class GFHtml5Placeholders {
                     }
                     if( isset($field['labelAddressState']) ) {
                         if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_4_container']/label")) ? $result->item(0) : null ) ){
-                            $label->nodeValue = $field['labelAddressState'];
+                            $label->nodeValue = esc_html($field['labelAddressState']);
                         }
                     }
                     if( isset($field['labelAddressStateVisible']) && $field['labelAddressStateVisible'] == false ) {
@@ -762,7 +755,7 @@ class GFHtml5Placeholders {
                 }
                 if( isset($field['labelAddressZip']) ) {
                     if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_5_container']/label")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelAddressZip'];
+                        $label->nodeValue = esc_html($field['labelAddressZip']);
                     }
                 }
                 if( isset($field['labelAddressZipVisible']) && $field['labelAddressZipVisible'] == false ) {
@@ -776,7 +769,7 @@ class GFHtml5Placeholders {
                 if (!isset($field['hideCountry']) || false === $field['hideCountry']) {
                     if( isset($field['labelAddressCountry']) ) {
                         if( $label = (( $result = $xpath->query("//span[@id='{$field_uid}_6_container']/label")) ? $result->item(0) : null ) ){
-                            $label->nodeValue = $field['labelAddressCountry'];
+                            $label->nodeValue = esc_html($field['labelAddressCountry']);
                         }
                     }
                     if( isset($field['labelAddressCountryVisible']) && $field['labelAddressCountryVisible'] == false ) {
@@ -826,11 +819,11 @@ class GFHtml5Placeholders {
                         if( isset($field['labelDateMonth']) ) {
                             if ( $this->is_form_editor() ) {
                                 if( $label = (( $result = $xpath->query("//div[@id='gfield_input_date_month']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateMonth'];
+                                    $label->nodeValue = esc_html($field['labelDateMonth']);
                                 }
                             } else {
                                 if( $label = (( $result = $xpath->query("//div[@id='{$field_uid}_1_container']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateMonth'];
+                                    $label->nodeValue = esc_html($field['labelDateMonth']);
                                 }
                             }
                         }
@@ -863,11 +856,11 @@ class GFHtml5Placeholders {
                         if( isset($field['labelDateDay']) ) {
                             if ( $this->is_form_editor() ) {
                                 if( $label = (( $result = $xpath->query("//div[@id='gfield_input_date_day']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateDay'];
+                                    $label->nodeValue = esc_html($field['labelDateDay']);
                                 }
                             } else {
                                 if( $label = (( $result = $xpath->query("//div[@id='{$field_uid}_2_container']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateDay'];
+                                    $label->nodeValue = esc_html($field['labelDateDay']);
                                 }
                             }
                         }
@@ -900,11 +893,11 @@ class GFHtml5Placeholders {
                         if( isset($field['labelDateYear']) ) {
                             if ( $this->is_form_editor() ) {
                                 if( $label = (( $result = $xpath->query("//div[@id='gfield_input_date_year']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateYear'];
+                                    $label->nodeValue = esc_html($field['labelDateYear']);
                                 }
                             } else {
                                 if( $label = (( $result = $xpath->query("//div[@id='{$field_uid}_3_container']/label")) ? $result->item(0) : null ) ){
-                                    $label->nodeValue = $field['labelDateYear'];
+                                    $label->nodeValue = esc_html($field['labelDateYear']);
                                 }
                             }
                         }
@@ -937,7 +930,7 @@ class GFHtml5Placeholders {
                 }
                 if( isset($field['labelTimeHour']) ) {
                     if( $label = (( $result = $xpath->query("//label[@for='{$field_uid}_1']")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelTimeHour'];
+                        $label->nodeValue = esc_html($field['labelTimeHour']);
                     }
                 }
                 if( isset($field['labelTimeHourVisible']) && $field['labelTimeHourVisible'] == false ) {
@@ -955,7 +948,7 @@ class GFHtml5Placeholders {
                 }
                 if( isset($field['labelTimeMinute']) ) {
                     if( $label = (( $result = $xpath->query("//label[@for='{$field_uid}_2']")) ? $result->item(0) : null ) ){
-                        $label->nodeValue = $field['labelTimeMinute'];
+                        $label->nodeValue = esc_html($field['labelTimeMinute']);
                     }
                 }
                 if( isset($field['labelTimeMinuteVisible']) && $field['labelTimeMinuteVisible'] == false ) {
@@ -966,6 +959,39 @@ class GFHtml5Placeholders {
                 }
             
             break; // break time
+            case 'product':
+            case 'singleproduct':
+            case 'calculation':
+                
+                $product_disable_quantity = isset($field['disableQuantity']) && $field['disableQuantity'];
+                if( $process_placeholders && !$product_disable_quantity && isset($field['placeholder']) && !empty($field['placeholder'] )) {
+                    if ( $this->is_form_editor() ) {
+                        if( $input = (( $result = $xpath->query("//input[@name='{$field_uid}.3']")) ? $result->item(0) : null ) ){
+                            $input->setAttribute('placeholder', esc_attr($field['placeholder']));
+                        }
+                    } else {
+                        if( $input = (( $result = $xpath->query("//input[@name='input_{$field_id}.3']")) ? $result->item(0) : null ) ){
+                            $input->setAttribute('placeholder', esc_attr($field['placeholder']));
+                        }
+                    }
+                }
+
+            break; // break product, singleproduct & caclulation
+            case 'quantity':
+                
+                $quantity_type = isset($field['inputType']) && !empty($field['inputType']) ? $field['inputType'] : 'number';
+                switch ($quantity_type) {
+                    case 'number':
+                        // Process Product Amount
+                        if( $process_placeholders && isset($field['placeholder']) && !empty($field['placeholder'] )){
+                            if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}']")) ? $result->item(0) : null ) ){
+                                $input->setAttribute('placeholder', esc_attr($field['placeholder']));
+                            }
+                        }
+                    break; // break number
+                }
+
+            break; // break quantity
         }
         
         $field_content = $doc->SaveHTML();

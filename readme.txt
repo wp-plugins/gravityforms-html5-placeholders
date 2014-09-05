@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.6
+Stable tag: 2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,15 +34,22 @@ It is fully compatible with WPML for placeholder and label translation using the
 * Time
 
 = Supported Post Fields =
-* Post Title
-* Post Content
-* Post Excerpt
+* Title
+* Body
+* Excerpt
+* Tags
+* Custom Field
+
+= Supported Pricing Fields =
+* Product
+* Quantity
+
 
 = Requirements =
 This plugin requires prior installation and activation of [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above.
 
 = Tested =
-Up to Gravity Forms plugin ver. 1.8.12
+Up to Gravity Forms plugin ver. 1.8.12.6
 
 == Installation ==
 
@@ -60,6 +67,12 @@ Up to Gravity Forms plugin ver. 1.8.12
 4. Editing an International Address Field
 
 == Changelog ==
+
+= 2.7 =
+* Added support for Product and Quantity pricing fields
+* Added support for Tags and Custom Field post fields
+* Fixed Html Escaped all labels on processing
+* Various code optimizations and cleanup
 
 = 2.6 =
 * Fixed scripts not loading when Gravity Forms no-conflict mode was enabled

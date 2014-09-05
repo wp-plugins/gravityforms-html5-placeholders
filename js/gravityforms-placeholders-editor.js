@@ -13,12 +13,11 @@
     window.wp = window.wp || {};
     wp.GravityForms = wp.GravityForms || {};
     wp.GravityForms.Editor = wp.GravityForms.Editor || {};
-    wp.GravityForms.Editor.FieldSettings = wp.GravityForms.Editor.FieldSettings || {};
-    wp.GravityForms.Editor.Events = wp.GravityForms.Editor.Events || _.extend({}, Backbone.Events);
+    wp.GravityForms.Editor.FieldSettings = wp.GravityForms.Editor.FieldSettings || {};   
     
     // Create variables
-    var GFViews = wp.GravityForms.Editor.FieldSettingsViews = wp.GravityForms.Editor.FieldSettingsViews || {};
-    
+    var GFViews = wp.GravityForms.Editor.Views = wp.GravityForms.Editor.Views || {};
+    var GFEvents    = wp.GravityForms.Editor.Events = wp.GravityForms.Editor.Events || _.extend({}, Backbone.Events);
     var GFSettings = wp.GravityForms.Settings = _gfPlaceholdersEditorL10n.settings || {
         is_gravityforms_html5_enabled : false,
     };
@@ -34,16 +33,19 @@
             if( typeof field === 'string' ) {
                 return $.inArray( field, this.fieldTypesSupported) > -1 ;
             } else {
-                return field && field.type && $.inArray( field.type, this.fieldTypesSupported) > -1 ;
+                return field.type && $.inArray( field.type, this.fieldTypesSupported ) > -1  ||
+                       'post_tags' === field.type && '' === field.inputType && $.inArray( 'text', this.fieldTypesSupported ) > -1 ||
+                       'post_category' !== field.type && field.inputType && $.inArray( field.inputType, this.fieldTypesSupported ) > -1 ;
             }
         },
         constructor: function( args ) {
             
             Backbone.View.apply(this, [args]);
             
-            if ( this.fieldSettingClass && this.fieldTypesSupported ) {
+            // Register our field setting classes
+            if ( this.fieldSettingClass && this.fieldTypesSupported && this.fieldTypesSupported.length > 0 ) {
                 for( index in this.fieldTypesSupported ){
-                    fieldType = this.fieldTypesSupported[ index ];
+                    var fieldType = this.fieldTypesSupported[ index ];
                     if ( String(fieldSettings[ fieldType ]).indexOf( "." + this.fieldSettingClass ) === -1)
                         fieldSettings[ fieldType ] += ", ." + this.fieldSettingClass;
                 }
@@ -87,12 +89,17 @@
                 var model = this.model( field );
                 if (model && this.template) {
                 
-                    if ( this.container )
+                    if ( this.container ){
                         this.container.html( this.template( model ) );
-                    else
+                    } else {
                         this.$el.html( this.template( model ) );
+                    }
 
                     this.initializeTooltips();
+
+                    // show the field setting if it is hidden
+                    if ( this.$el ) this.$el.show();
+
                 }
             
             }
@@ -108,19 +115,26 @@
     // Email Confirm Setting
     GFViews.EmailConfirmSettingEditor = GFViews.FieldSettingEditor.extend({
         el: 'li.email_confirm_setting.field_setting',
-        fieldSettingClass: 'email_confirm_setting',
         fieldTypesSupported: [ 'email'],
         renderEnabled : false,
         events: {
             'click input#gfield_email_confirm_enabled' : 'inputEmailConfirmEnabledOnClick'
         },
         initialize: function(){
+
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
         },
+
         // Events
         inputEmailConfirmEnabledOnClick : function( e ) {
             wp.GravityForms.Editor.Events.trigger("inputEmailConfirmEnabledOnClick", e );
         },
+
     });
     
     // Rules Setting
@@ -135,18 +149,160 @@
         initialize: function(){
             
             // Get all the types that support the label_setting
-            for( fieldType in fieldSettings ){
-                if (String(fieldSettings[fieldType]).indexOf(".rules_setting") !== -1)
+            for( var fieldType in fieldSettings ){
+                if (String(fieldSettings[fieldType]).indexOf("." + this.fieldSettingClass) !== -1)
                     this.fieldTypesSupported.push( fieldType );
             }
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
         },
+
         // Events
         inputFieldRequiredOnClick : function( e ) {
             $('.field_selected' ).toggleClass( 'gfield_contains_required', e.currentTarget.checked );
             wp.GravityForms.Editor.Events.trigger("inputFieldRequiredOnClick", e );
         },
+
+    });
+
+    // Product Field Type Setting
+    GFViews.ProductFieldTypeSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.product_field_type_setting.field_setting',
+        fieldSettingClass: 'product_field_type_setting',
+        fieldTypesSupported: [ 'product'],
+        renderEnabled : false,
+        events: {
+            'change select#product_field_type' : 'selectProductFieldTypeOnChange'
+        },
+        initialize: function(){
+            
+            // Initialize our object
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+        },
+
+        // Events
+        selectProductFieldTypeOnChange : function( e ) {
+            wp.GravityForms.Editor.Events.trigger("selectProductFieldTypeOnChange", e );
+        },
+
+    });
+
+    // Quantity Field Type Setting
+    GFViews.QuantityFieldTypeSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.quantity_field_type_setting.field_setting',
+        fieldSettingClass: 'quantity_field_type_setting',
+        fieldTypesSupported: [ 'quantity'],
+        renderEnabled : false,
+        events: {
+            'change select#quantity_field_type' : 'selectQuantityFieldTypeOnChange'
+        },
+        initialize: function(){
+
+            // Initialize our object
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+        },
+
+        // Events
+        selectQuantityFieldTypeOnChange : function( e ) {
+            wp.GravityForms.Editor.Events.trigger("selectQuantityFieldTypeOnChange", e );
+        },
+
+    });
+
+    // Post Tag Type Setting
+    GFViews.PostTagTypeSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.post_tag_type_setting.field_setting',
+        fieldSettingClass: 'post_tag_type_setting',
+        fieldTypesSupported: [ 'post_tags'],
+        renderEnabled : false,
+        events: {
+            'change select#post_tag_type' : 'selectPostTagTypeOnChange'
+        },
+        initialize: function(){
+            
+            // Initialize our object            
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+        },
+
+        // Events
+        selectPostTagTypeOnChange : function( e ) {
+            wp.GravityForms.Editor.Events.trigger("selectPostTagTypeOnChange", e );
+        },
+
+    });
+
+    // Post Custom Field Type Setting
+    GFViews.PostCustomFieldTypeSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.post_custom_field_type_setting.field_setting',
+        fieldSettingClass: 'post_custom_field_type_setting',
+        fieldTypesSupported: [ 'post_custom_field'],
+        renderEnabled : false,
+        events: {
+            'change select#post_custom_field_type' : 'selectPostCustomFieldTypeOnChange'
+        },
+        initialize: function(){
+
+            // Initialize our object
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+        },
+
+        // Events
+        selectPostCustomFieldTypeOnChange : function( e ) {
+            wp.GravityForms.Editor.Events.trigger("selectPostCustomFieldTypeOnChange", e );
+        },
+
+    });
+
+    // Disable Quantity Setting
+    GFViews.DisableQuantitySettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.disable_quantity_setting.field_setting',
+        fieldSettingClass: 'disable_quantity_setting',
+        fieldTypesSupported: [ 'singleproduct', 'calculation'],
+        renderEnabled : false,
+        events: {
+            'click input#field_disable_quantity' : 'inputFieldDisableQuantityOnClick'
+        },
+        initialize: function(){
+
+            // Initialize our object
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+        },
+        refresh: function() {
+            var field = GetSelectedField()
+                disableQuantity = field.disableQuantity || false;
+            $('.field_selected .ginput_quantity_label, .field_selected .ginput_quantity').toggle( !disableQuantity );
+        },
+
+        // Events
+        inputFieldDisableQuantityOnClick : function( e ) {
+            wp.GravityForms.Editor.Events.trigger("inputFieldDisableQuantityOnClick", e );
+        },
+
     });
 
     // Placeholder Setting
@@ -155,20 +311,22 @@
         fieldSettingClass : 'placeholder_setting',
         fieldTypesSupported : [ 'text', 'textarea', 'phone', 'website', 'number', 'post_title', 'post_content', 'post_excerpt' ],
         events: {
-            'keyup input#placeholder_text'              : 'inputPlaceholderOnKeyUp',
-            'keyup input#placeholder_phone'             : 'inputPlaceholderOnKeyUp',
-            'keyup input#placeholder_website'           : 'inputPlaceholderOnKeyUp',
-            'keyup input#placeholder_number'            : 'inputPlaceholderOnKeyUp',
-            'keyup input#placeholder_post_title'        : 'inputPlaceholderOnKeyUp',
-            'keyup textarea#placeholder_textarea'       : 'inputPlaceholderOnKeyUp',
-            'keyup textarea#placeholder_post_content'   : 'inputPlaceholderOnKeyUp',
-            'keyup textarea#placeholder_post_excerpt'   : 'inputPlaceholderOnKeyUp',
+            'keyup input#placeholder'              : 'inputPlaceholderOnKeyUp',
+            'keyup textarea#placeholder'           : 'inputPlaceholderOnKeyUp', 
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-setting').html() );
             this.container = this.$('#placeholder_setting_container');
+            
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+            // Listen to our events
+            wp.GravityForms.Editor.Events.bind("selectPostTagTypeOnChange", this.refresh);
+            wp.GravityForms.Editor.Events.bind("selectPostCustomFieldTypeOnChange", this.refresh);
 
         },
         model : function ( field ){
@@ -176,17 +334,26 @@
                 field : {
                     id:             field.id,
                     type:           field.type,
+                    inputType:      field.inputType || 'text', 
                     size:           'undefined' === typeof field['size']        ? 'medium'  : field.size,
                     placeholder:    'undefined' === typeof field['placeholder'] ? ''        : field.placeholder,
                 }
             };
             return model;
         },
+        refresh : function () {
+            var field = GetSelectedField(),
+                placeholder = field.placeholder || '';
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id).attr('placeholder', placeholder);
+            this.render( field );
+        },
+
         // Events
         inputPlaceholderOnKeyUp : function( e ) {
             SetFieldProperty('placeholder', e.currentTarget.value );
-            var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id']).attr('placeholder', e.currentTarget.value);
+            var field = GetSelectedField(),
+                placeholder = field.placeholder || '';
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id).attr('placeholder', field.placeholder);
         },
 
     });
@@ -206,7 +373,13 @@
             'click input#field_address_hide_country_international'  : 'inputHideCountryOnClick',
         },
         initialize: function(){
+
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
         },
 
         // Events
@@ -234,13 +407,20 @@
             'change select#field_date_input_type' : 'selectDateInputTypeOnChange',
         },
         initialize: function(){
+
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
         },
 
         // Events
         selectDateInputTypeOnChange : function( e ) {
             wp.GravityForms.Editor.Events.trigger("selectDateInputTypeOnChange", e );
         },
+
     });
 
     // Placeholder Email Setting
@@ -252,19 +432,22 @@
             'keyup input#placeholder_email'             : 'inputPlaceholderEmailOnKeyUp',
             'keyup input#placeholder_email_confirm'     : 'inputPlaceholderEmailConfirmOnKeyUp',
         },
-
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-email-setting').html() );
             this.container = this.$('#placeholder_email_setting_container');
             
-            // Listen to our events
+            // Bind this to our events
             _.bindAll(this, "refresh");
             _.bindAll(this, "inputEmailConfirmEnabledOnClick");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind("inputEmailConfirmEnabledOnClick", this.inputEmailConfirmEnabledOnClick);
             wp.GravityForms.Editor.Events.bind("inputLabelEnterEmailOnKeyUp", this.refresh );
             wp.GravityForms.Editor.Events.bind("inputLabelConfirmEmailOnKeyUp",  this.refresh );
+
         },
         model : function ( field ){
             var model = { 
@@ -279,6 +462,7 @@
             };
             return model;
         },
+
         // Events
         inputEmailConfirmEnabledOnClick: function( e ){
             this.refresh();
@@ -286,12 +470,12 @@
         inputPlaceholderEmailOnKeyUp : function( e ) {
             SetFieldProperty('placeholder', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="input_'+ field['id'] + '"]').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="input_'+ field.id + '"]').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderEmailConfirmOnKeyUp : function ( e ){
             SetFieldProperty('placeholderEmailConfirm', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="input_'+ field['id'] + '_2"]').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="input_'+ field.id + '_2"]').attr('placeholder', e.currentTarget.value);
         },
 
     }); 
@@ -310,12 +494,15 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-name-setting').html() );
             this.container = this.$('#placeholder_name_setting_container');
 
-            // Listen to our events
+            // Bind this to our events
             _.bindAll(this, "refresh");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind("inputLabelNamePrefixOnKeyUp", this.refresh );
             wp.GravityForms.Editor.Events.bind("inputLabelNameFirstOnKeyUp",  this.refresh );
             wp.GravityForms.Editor.Events.bind("inputLabelNameLastOnKeyUp",   this.refresh );
@@ -343,27 +530,27 @@
         inputPlaceholderNameOnKeyUp : function( e ) {
             SetFieldProperty('placeholder', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id ).attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderNamePrefixOnKeyUp : function( e ) {
             SetFieldProperty('placeholderNamePrefix', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_2').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_2').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderNameFirstOnKeyUp : function( e ) {
             SetFieldProperty('placeholderNameFirst', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_3').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_3').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderNameLastOnKeyUp : function( e ) {
             SetFieldProperty('placeholderNameLast', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_6' ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_6' ).attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderNameSuffixOnKeyUp : function( e ) {
             SetFieldProperty('placeholderNameSuffix', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_8' ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_8' ).attr('placeholder', e.currentTarget.value);
         },
 
     });     
@@ -382,12 +569,15 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-address-setting').html() );
             this.container = this.$('#placeholder_address_setting_container');
 
-            // Listen to our events
+            // Bind this to our events
             _.bindAll(this, "refresh");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind( "selectAddressTypeOnChange", this.refresh );
             wp.GravityForms.Editor.Events.bind( "inputHideAddressStreet2OnClick", this.refresh );
             wp.GravityForms.Editor.Events.bind( "inputHideStateOnClick", this.refresh );
@@ -422,27 +612,27 @@
         inputPlaceholderAddressStreetOnKeyUp : function( e ) {
             SetFieldProperty('placeholderAddressStreet', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_1').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_1').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderAddressStreet2OnKeyUp : function( e ) {
             SetFieldProperty('placeholderAddressStreet2', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_2').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_2').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderAddressCityOnKeyUp : function( e ) {
             SetFieldProperty('placeholderAddressCity', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_3').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_3').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderAddressStateOnKeyUp : function( e ) {
             SetFieldProperty('placeholderAddressState', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="input_'+ field['id'] + '.4"]' ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="input_'+ field.id + '.4"]' ).attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderAddressZipOnKeyUp : function( e ) {
             SetFieldProperty('placeholderAddressZip', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_5' ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_5' ).attr('placeholder', e.currentTarget.value);
         },
 
     });
@@ -460,13 +650,17 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-date-setting').html() );
             this.container = this.$('#placeholder_date_setting_container');
+            
+            // Bind this to our events
+            _.bindAll(this, "refresh");
 
             // Listen to our events
-            _.bindAll(this, "refresh");
             wp.GravityForms.Editor.Events.bind( "selectDateInputTypeOnChange", this.refresh );
+
         },
         model : function ( field ){
 
@@ -489,22 +683,22 @@
         inputPlaceholderDateOnKeyUp : function( e ) {
             SetFieldProperty('placeholder', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="ginput_datepicker"]').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="ginput_datepicker"]').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderDateDayOnKeyUp : function( e ) {
             SetFieldProperty('placeholderDateDay', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="ginput_day"]').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="ginput_day"]').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderDateMonthOnKeyUp : function( e ) {
             SetFieldProperty('placeholderDateMonth', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="ginput_month"]').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="ginput_month"]').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderDateYearOnKeyUp : function( e ) {
             SetFieldProperty('placeholderDateYear', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected input[name="ginput_year"]' ).attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected input[name="ginput_year"]' ).attr('placeholder', e.currentTarget.value);
         },
 
     });
@@ -520,12 +714,14 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( this.$('#tmpl-gf-placeholder-time-setting').html() );
             this.container = this.$('#placeholder_time_setting_container');
 
-            // Listen to our events
+            // Bind this to our events
             _.bindAll(this, "refresh");
+
         },
         model : function ( field ){
 
@@ -540,17 +736,95 @@
 
             return model;
         },
+
         // Events
         inputPlaceholderTimeHourOnKeyUp : function( e ) {
             SetFieldProperty('placeholderTimeHour', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_1').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_1').attr('placeholder', e.currentTarget.value);
         },
         inputPlaceholderTimeMinuteOnKeyUp : function( e ) {
             SetFieldProperty('placeholderTimeMinute', e.currentTarget.value );
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected #input_'+ field['id'] + '_2').attr('placeholder', e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected #input_'+ field.id + '_2').attr('placeholder', e.currentTarget.value);
         },
+
+    });
+
+    // Placeholder Product Setting Editor
+    GFViews.PlaceholderProductSettingEditor = GFViews.FieldSettingEditor.extend({
+        el: 'li.placeholder_product_setting.field_setting',
+        fieldSettingClass: 'placeholder_product_setting',
+        fieldTypesSupported : [ 'product' ],
+        events: {
+            'keyup input#placeholder_product'      : 'inputPlaceholderProductOnKeyUp',
+        },
+        initialize: function(){
+
+            // Initialize our object
+            this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
+            this.template  = _.template( this.$('#tmpl-gf-placeholder-product-setting').html() );
+            this.container = this.$('#placeholder_product_setting_container');
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+            _.bindAll(this, "inputFieldDisableQuantityOnClick"); 
+    
+            // Listen to our events
+            wp.GravityForms.Editor.Events.bind( "selectProductFieldTypeOnChange", this.refresh );
+            wp.GravityForms.Editor.Events.bind( "inputFieldDisableQuantityOnClick", this.inputFieldDisableQuantityOnClick );
+
+        },
+        model : function ( field ){
+
+            var model = { 
+                    field : {
+                        id:                         field.id,
+                        type:                       field.type,
+                        inputType:                  'undefined' === typeof field['inputType'] || '' === field.inputType     ? 'singleproduct'   : field.inputType,
+                        disableQuantity:            field['disableQuantity'] || false,
+                        placeholder:                'undefined' === typeof field['placeholder']                             ? ''                : field.placeholder,
+                    },
+                };
+
+            return model;
+        },
+        refresh: function(){
+            var field = GetSelectedField(),
+                placeholder = field.placeholder || '',
+                inputType = field.inputType || 'singleproduct';
+
+            if ( 'singleproduct' === inputType || 'calculation' === inputType ) {
+                $('#field_'+ field.id + '.field_selected input[name="input_' + field.id + '.3"]').attr('placeholder', placeholder);
+            } else if ( 'price' === inputType ) {
+                $('#field_'+ field.id + '.field_selected #input_'+ field.id).attr('placeholder', placeholder);
+            }
+            this.render( field );
+        },
+
+        // Events
+        inputPlaceholderProductOnKeyUp : function( e ) {
+            SetFieldProperty('placeholder', e.currentTarget.value );
+            var field = GetSelectedField(),
+                placeholder = e.currentTarget.value,
+                inputType = field.inputType || 'singleproduct';
+
+            if ( 'singleproduct' === inputType || 'calculation' === inputType ) {
+                $('#field_'+ field.id + '.field_selected input[name="input_' + field.id + '.3"]').attr('placeholder', placeholder);
+            } else if ( 'price' === inputType ) {
+                $('#field_'+ field.id + '.field_selected #input_'+ field.id).attr('placeholder', placeholder);
+            }
+        },
+        inputFieldDisableQuantityOnClick : function ( e ) {
+            var field = GetSelectedField(),
+                placeholder = field.placeholder || '';
+
+            if ( !e.currentTarget.checked ) {
+                $('#field_'+ field.id + '.field_selected input[name="input_' + field.id + '.3"]').attr('placeholder', placeholder);
+            }
+            this.refresh();
+        },
+
     });
 
     GFViews.LabelVisibleSettingEditor = GFViews.FieldSettingEditor.extend({
@@ -563,13 +837,20 @@
         initialize: function(){
 
             // Get all the types that support the label_setting
-            for( fieldType in fieldSettings ){
-                if (String(fieldSettings[fieldType]).indexOf(".label_setting") !== -1)
+            for( var fieldType in fieldSettings ){
+                if (String(fieldSettings[fieldType]).indexOf("." + this.fieldSettingClass) !== -1)
                     this.fieldTypesSupported.push( fieldType );
             }
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-label-setting').html() );
+
+            // Bind this to our events
+            _.bindAll(this, "refresh");
+
+            // Move setting to the top
+            this.$el.parent().prepend( this.$el );
 
             // Create and inject our custom container
             this.$('input#field_label').after('<div id="label_visible_setting_container"></div>');
@@ -586,6 +867,7 @@
             };
             return model;
         },
+
         // Events
         inputLabelVisibleOnClick : function( e ) {
             SetFieldProperty('labelVisible', e.currentTarget.checked );
@@ -612,11 +894,16 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-email-label-setting').html() );
             this.container = this.$('#email_label_setting_container');
-
+            
+            // Bind this to our events
+            _.bindAll(this, "refresh");
             _.bindAll(this, "inputEmailConfirmEnabledOnClick");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind("inputEmailConfirmEnabledOnClick", this.inputEmailConfirmEnabledOnClick);
 
         },
@@ -634,6 +921,7 @@
             };
             return model;
         },
+
         // Events
         inputEmailConfirmEnabledOnClick: function( e ){
             this.$el.hide();
@@ -643,27 +931,28 @@
         inputLabelEnterEmailVisibleOnClick: function( e ){
             SetFieldProperty('labelEnterEmailVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '"]:not(.gfield_label)').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '"]:not(.gfield_label)').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelEnterEmailOnKeyUp: function( e ){
             SetFieldProperty('labelEnterEmail', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '"]:not(.gfield_label)').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '"]:not(.gfield_label)').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelEnterEmailOnKeyUp", e );
         },
         inputLabelConfirmEmailVisibleOnClick: function( e ){
             SetFieldProperty('labelConfirmEmailVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelConfirmEmailOnKeyUp: function( e ){
             SetFieldProperty('labelConfirmEmail', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .ginput_confirm_email label[for="input_'+ field['id'] + '_2"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected .ginput_confirm_email label[for="input_'+ field.id + '_2"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelConfirmEmailOnKeyUp", e );
         },
+
     });
 
 
@@ -683,9 +972,13 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-name-label-setting').html() );
             this.container = this.$('#name_label_setting_container');
+            
+            // Bind this to our events
+            _.bindAll(this, "refresh");
 
         },
         model : function ( field ){
@@ -706,6 +999,7 @@
             };
             return model;
         },
+
         // Events
         selectAddressTypeOnClick: function( e ){
             this.$el.hide();
@@ -715,49 +1009,49 @@
         inputLabelNamePrefixVisibleOnClick: function( e ){
             SetFieldProperty('labelNamePrefixVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]:not(.gfield_label)').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]:not(.gfield_label)').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelNamePrefixOnKeyUp: function( e ){
             SetFieldProperty('labelNamePrefix', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]:not(.gfield_label)').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]:not(.gfield_label)').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelNamePrefixOnKeyUp", e );
         },
         inputLabelNameFirstVisibleOnClick: function( e ){
             SetFieldProperty('labelNameFirstVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_3"]:not(.gfield_label)').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_3"]:not(.gfield_label)').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelNameFirstOnKeyUp: function( e ){
             SetFieldProperty('labelNameFirst', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_3"]:not(.gfield_label)').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_3"]:not(.gfield_label)').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelNameFirstOnKeyUp", e );
         },
         inputLabelNameLastVisibleOnClick: function( e ){
             SetFieldProperty('labelNameLastVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_6"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_6"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelNameLastOnKeyUp: function( e ){
             SetFieldProperty('labelNameLast', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_6"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_6"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelNameLastOnKeyUp", e );
         },
         inputLabelNameSuffixVisibleOnClick: function( e ){
             SetFieldProperty('labelNameSuffixVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_8"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_8"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelNameSuffixOnKeyUp: function( e ){
             SetFieldProperty('labelNameSuffix', e.currentTarget.value);
             var field = GetSelectedField();            
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_8"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_8"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelNameSuffixOnKeyUp", e );
         },
 
@@ -784,11 +1078,15 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-address-label-setting').html() );
             this.container = this.$('#address_label_setting_container');
             
+            // Bind this to our events
             _.bindAll(this, "refresh");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind( "selectAddressTypeOnChange", this.refresh );
             wp.GravityForms.Editor.Events.bind( "inputHideAddressStreet2OnClick", this.refresh );
             wp.GravityForms.Editor.Events.bind( "inputHideStateOnClick", this.refresh );
@@ -845,75 +1143,76 @@
         inputLabelAddressStreetVisibleOnClick: function( e ){
             SetFieldProperty('labelAddressStreetVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_1"]:not(.gfield_label)').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_1"]:not(.gfield_label)').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressStreetOnKeyUp: function( e ){
             SetFieldProperty('labelAddressStreet', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_1"]:not(.gfield_label)').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_1"]:not(.gfield_label)').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressStreetOnKeyUp", e );
         },
         inputLabelAddressStreet2VisibleOnClick: function( e ){
             SetFieldProperty('labelAddressStreet2Visible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressStreet2OnKeyUp: function( e ){
             SetFieldProperty('labelAddressStreet2', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressStreet2OnKeyUp", e );
         },
         inputLabelAddressCityVisibleOnClick: function( e ){
             SetFieldProperty('labelAddressCityVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_3"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_3"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressCityOnKeyUp: function( e ){
             SetFieldProperty('labelAddressCity', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_3"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_3"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressCityOnKeyUp", e );
         },
         inputLabelAddressStateVisibleOnClick: function( e ){
             SetFieldProperty('labelAddressStateVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_4"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_4"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressStateOnKeyUp: function( e ){
             SetFieldProperty('labelAddressState', e.currentTarget.value);
             var field = GetSelectedField();         
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_4"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_4"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressStateOnKeyUp", e );
         },
         inputLabelAddressZipVisibleOnClick: function( e ){
             SetFieldProperty('labelAddressZipVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_5"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_5"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressZipOnKeyUp: function( e ){
             SetFieldProperty('labelAddressZip', e.currentTarget.value); 
             var field = GetSelectedField();         
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_5"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_5"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressZipOnKeyUp", e );
         },
         inputLabelAddressCountryVisibleOnClick: function( e ){
             SetFieldProperty('labelAddressCountryVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_6"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_6"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelAddressCountryOnKeyUp: function( e ){
             SetFieldProperty('labelAddressCountry', e.currentTarget.value);
             var field = GetSelectedField();      
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_6"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_6"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelAddressCountryOnKeyUp", e );
         },
+
     });
 
     GFViews.DateLabelSettingEditor = GFViews.FieldSettingEditor.extend({
@@ -930,11 +1229,15 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-date-label-setting').html() );
             this.container = this.$('#date_label_setting_container');
 
+            // Bind this to our events
             _.bindAll(this, "refresh");
+
+            // Listen to our events
             wp.GravityForms.Editor.Events.bind( "selectDateInputTypeOnChange", this.refresh );
 
         },
@@ -954,43 +1257,45 @@
             };
             return model;
         },
+
         // Events
         inputLabelDateDayVisibleOnClick: function( e ){
             SetFieldProperty('labelDateDayVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_day label').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected .gfield_date_day label').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelDateDayOnKeyUp: function( e ){
             SetFieldProperty('labelDateDay', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_day label').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected .gfield_date_day label').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelEnterEmailOnKeyUp", e );
         },
         inputLabelDateMonthVisibleOnClick: function( e ){
             SetFieldProperty('labelDateMonthVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_month label').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected .gfield_date_month label').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelDateMonthOnKeyUp: function( e ){
             SetFieldProperty('labelDateMonth', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_month label').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected .gfield_date_month label').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelConfirmEmailOnKeyUp", e );
         },
         inputLabelDateYearVisibleOnClick: function( e ){
             SetFieldProperty('labelDateYearVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_year label').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected .gfield_date_year label').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelDateYearOnKeyUp: function( e ){
             SetFieldProperty('labelDateYear', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected .gfield_date_year label').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected .gfield_date_year label').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelConfirmEmailOnKeyUp", e );
         },
+
     });
 
     GFViews.TimeLabelSettingEditor = GFViews.FieldSettingEditor.extend({
@@ -1005,10 +1310,12 @@
         },
         initialize: function(){
 
+            // Initialize our object
             this.events = _.extend({}, GFViews.FieldSettingEditor.prototype.events,this.events);
             this.template  = _.template( $('#tmpl-gf-time-label-setting').html() );
             this.container = this.$('#time_label_setting_container');
 
+            // Bind this to our events
             _.bindAll(this, "refresh");
 
         },
@@ -1025,31 +1332,33 @@
             };
             return model;
         },
+
         // Events
         inputLabelDateDayVisibleOnClick: function( e ){
             SetFieldProperty('labelTimeHourVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_1"]:not(.gfield_label)').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_1"]:not(.gfield_label)').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelDateDayOnKeyUp: function( e ){
             SetFieldProperty('labelTimeHour', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_1"]:not(.gfield_label)').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_1"]:not(.gfield_label)').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelEnterEmailOnKeyUp", e );
         },
         inputLabelDateMonthVisibleOnClick: function( e ){
             SetFieldProperty('labelTimeMinuteVisible', e.currentTarget.checked);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]').toggle(e.currentTarget.checked);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]').toggle(e.currentTarget.checked);
             this.refresh();
         },
         inputLabelDateMonthOnKeyUp: function( e ){
             SetFieldProperty('labelTimeMinute', e.currentTarget.value);
             var field = GetSelectedField();
-            $('#field_'+ field['id'] + '.field_selected label[for="input_'+ field['id'] + '_2"]').text(e.currentTarget.value);
+            $('#field_'+ field.id + '.field_selected label[for="input_'+ field.id + '_2"]').text(e.currentTarget.value);
             wp.GravityForms.Editor.Events.trigger("inputLabelConfirmEmailOnKeyUp", e );
         },
+        
     });
 
     $(document).ready( function(){
@@ -1059,6 +1368,11 @@
         wp.GravityForms.Editor.FieldSettings['rules']               = new GFViews.RulesSettingEditor();
         wp.GravityForms.Editor.FieldSettings['address']             = new GFViews.AddressSettingEditor();
         wp.GravityForms.Editor.FieldSettings['dateInputType']       = new GFViews.DateInputTypeSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['productFieldType']    = new GFViews.ProductFieldTypeSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['quantityFieldType']   = new GFViews.QuantityFieldTypeSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['postTagType']         = new GFViews.PostTagTypeSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['postCustomFieldType'] = new GFViews.PostCustomFieldTypeSettingEditor();
+        wp.GravityForms.Editor.FieldSettings['disableQuantity']     = new GFViews.DisableQuantitySettingEditor();
 
         if ( GFSettings.is_gravityforms_html5_enabled ) {
 
@@ -1069,6 +1383,7 @@
             wp.GravityForms.Editor.FieldSettings['placeholderAddress']  = new GFViews.PlaceholderAddressSettingEditor();
             wp.GravityForms.Editor.FieldSettings['placeholderDate']     = new GFViews.PlaceholderDateSettingEditor();
             wp.GravityForms.Editor.FieldSettings['placeholderTime']     = new GFViews.PlaceholderTimeSettingEditor();
+            wp.GravityForms.Editor.FieldSettings['placeholderProduct']  = new GFViews.PlaceholderProductSettingEditor();
         
         }
         
