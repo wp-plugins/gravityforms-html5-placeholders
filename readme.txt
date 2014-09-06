@@ -95,7 +95,7 @@ Up to Gravity Forms plugin ver. 1.8.12.6
 * Added minified versions of scripts 
 
 = 2.4 =
-* Added support for Post Title, Post Content and Post Excerpt fields
+* Added support for Title, Body and Excerpt post fields
 
 = 2.3 =
 * Initial WordPress.org Release
