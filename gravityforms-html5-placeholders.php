@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms HTML5 Placeholders
 Plugin URI: http://www.isoftware.gr/wordpress/plugins/gravityforms-html5-placeholders
 Description: Adds native HTML5 placeholder support to Gravity Forms' fields with javascript fallback. Javascript & jQuery are required.
-Version: 2.7
+Version: 2.7.1
 Author: iSoftware
 Author URI: http://www.isoftware.gr
 
@@ -29,7 +29,7 @@ if (!class_exists('GFHtml5Placeholders')):
 
 class GFHtml5Placeholders {
 
-    protected $_version = "2.7";
+    protected $_version = "2.7.1";
     protected $_min_gravityforms_version = "1.7";
     protected $_slug = "html5_placeholders";
     protected $_full_path = __FILE__;
@@ -57,7 +57,7 @@ class GFHtml5Placeholders {
 
         // Initialize our strings
         $this->_strings = (object) array(
-            
+
             // General
             'labels' => (object) array(
                 'singular'  => (object) array(
@@ -95,7 +95,7 @@ class GFHtml5Placeholders {
             'labelConfirmEmail' => (object) array(
                 'default'           =>  __( 'Confirm Email', 'gravityforms' ),
             ),
-            
+
             // Name field
             'labelNamePrefix'       => (object) array(
                 'default'           =>  __( 'Prefix', 'gravityforms' ),
@@ -164,7 +164,7 @@ class GFHtml5Placeholders {
     public function init() {
 
         // load_plugin_textdomain($this->_slug, FALSE, $this->_slug . '/languages');
-        
+
         if( $this->is_gravityforms_supported() ){
 
             if( defined('RG_CURRENT_PAGE') && RG_CURRENT_PAGE == 'admin-ajax.php' ) {
@@ -180,30 +180,30 @@ class GFHtml5Placeholders {
 
     }
 
-    /** 
+    /**
      * add tasks or filters here that you want to perform both in the backend and frontend and for ajax requests
      */
     private function init_ajax(){
 
         // We use this filter to manipulate our own field editor settings output
         add_filter( 'gform_field_content', array( $this, 'get_field_content' ), 10, 3);
-    
+
             // We use this filter to manipulate our own field classes
-        add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3); 
+        add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3);
 
         // We use this filter to provide translation support through WPML Gravity Forms Multilingual
         add_filter( 'gform_multilingual_field_keys',    array( $this, 'multilingual_field_keys' ));
 
     }
 
-    /** 
+    /**
      * add tasks or filters here that you want to perform only in admin
      */
     private function init_admin(){
-     
+
         // Check if we are currently on the form editor page
         if ( $this->is_form_editor() ) {
-            
+
             // enqueues admin scripts
             add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_admin' ), 10, 0);
 
@@ -215,20 +215,20 @@ class GFHtml5Placeholders {
 
             // We use this action to add our own field editor settings on the standard tab
             add_action( 'gform_field_standard_settings',    array( $this, 'field_standard_settings' ), 10, 2);
-            
+
             // We use this filter to manipulate our own field output
             add_filter( 'gform_field_content', array( $this, 'get_field_content' ), 10, 3);
 
             // We use this filter to manipulate our own field classes
-            add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3); 
+            add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3);
         }
 
         // We use this filter to provide translation support through WPML Gravity Forms Multilingual
         add_filter( 'gform_multilingual_field_keys',    array( $this, 'multilingual_field_keys'));
-        
+
     }
 
-    /** 
+    /**
      * add tasks or filters here that you want to perform only in the front end
      */
     private function init_frontend(){
@@ -240,7 +240,7 @@ class GFHtml5Placeholders {
         add_filter( 'gform_field_content', array( $this, 'get_field_content' ), 10, 3);
 
         // We use this filter to manipulate our own field classes
-        add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3); 
+        add_filter( 'gform_field_css_class', array( $this, 'get_field_css_class'), 10, 3);
 
         // We use this filter to provide translation support through WPML Gravity Forms Multilingual
         add_filter( 'gform_multilingual_field_keys',    array( $this, 'multilingual_field_keys' ));
@@ -252,16 +252,16 @@ class GFHtml5Placeholders {
     * Target of wp_enqueue_scripts action.
     */
     public function enqueue_scripts_frontend( $form = "", $ajax = false ){
-        
+
         // Add support for minified scripts
         $suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
         wp_register_script( 'gforms_placeholders_fallback', $this->get_base_url() . "/js/gravityforms-placeholders-fallback" . $suffix . ".js",   array( 'jquery' ), $this->_version, false );
         wp_register_style( 'gforms_placeholders_css',   $this->get_base_url() . "/css/gravityforms-placeholders.css", array('gforms_formsmain_css'), $this->_version );
-        
+
         // Enqueue our scripts and styles
         wp_enqueue_script( 'gforms_placeholders_fallback' );
-        
+
         if( !apply_filters( 'gform_placeholders_disable_css', get_option('rg_gforms_disable_css')) ) {
             wp_enqueue_style( 'gforms_placeholders_css' );
         }
@@ -282,7 +282,7 @@ class GFHtml5Placeholders {
         // Enqueue our scripts and styles
         wp_enqueue_script( 'gforms_placeholders_editor');
         wp_enqueue_style( 'gforms_placeholders_editor_css');
-        
+
         // Pass variables to gravityforms-placeholders-editor script
         wp_localize_script('gforms_placeholders_editor', '_gfPlaceholdersEditorL10n', array(
             'settings' => array(
@@ -323,7 +323,7 @@ class GFHtml5Placeholders {
 
         // Put our field settings right after the Field Label
         if ( $position == 0 ) {
-            
+
             global $GFCommon;
 
             // Add label management support for standard field types
@@ -338,7 +338,7 @@ class GFHtml5Placeholders {
 
             // Add placeholder suport for standard field types
             $this->get_template_part( 'gf-generic-placeholder-setting.tmpl.php', null, true );
-            
+
             // Add placeholder suport for advanced field types
             $this->get_template_part( 'gf-email-placeholder-setting.tmpl.php', null, true );
             $this->get_template_part( 'gf-name-placeholder-setting.tmpl.php' , null , true );
@@ -350,7 +350,7 @@ class GFHtml5Placeholders {
             $this->get_template_part( 'gf-product-placeholder-setting.tmpl.php', null, true );
 
         }
-    
+
     }
 
     /**
@@ -365,7 +365,7 @@ class GFHtml5Placeholders {
 
             // General
             $field_keys[] = "placeholder";
-            
+
             // Email field
             $field_keys[] = "placeholderEmailConfirm";
 
@@ -391,16 +391,16 @@ class GFHtml5Placeholders {
             // Time field
             $field_keys[] = "placeholderTimeHour";
             $field_keys[] = "placeholderTimeMinute";
-        
+
         }
-         
+
         // Export our label field keys for translation
         // *******************************************
 
         // Email field
         $field_keys[] = "labelEnterEmail";
         $field_keys[] = "labelConfirmEmail";
-        
+
         // Name field
         $field_keys[] = "labelNamePrefix";
         $field_keys[] = "labelNameFirst";
@@ -423,7 +423,7 @@ class GFHtml5Placeholders {
         // Time field
         $field_keys[] = "labelTimeHour";
         $field_keys[] = "labelTimeMinute";
-    
+
         return $field_keys;
 
     }
@@ -432,10 +432,10 @@ class GFHtml5Placeholders {
     * Target of gform_field_css_class both on form editor & frontend.
     */
     public function get_field_css_class ( $css_class, $field, $form ){
-        
-        if ( !isset($css_class) || !isset($field) || !array_key_exists('formId', $field) ) 
+
+        if ( !isset($css_class) || !isset($field) || !array_key_exists('formId', $field) )
             return $css_class;
-        
+
         $css_class_array = preg_split( '/\s+/', $css_class );
 
         // Process Field Label Replacements
@@ -450,21 +450,27 @@ class GFHtml5Placeholders {
     * Target of gform_field_content both on form editor & frontend.
     */
     public function get_field_content ( $field_content, $field, $force_frontend_label ){
-    
-        if ( !isset($field_content) || !isset($field) || !array_key_exists('formId', $field) ) 
+
+        if ( !isset($field_content) || !isset($field) || !array_key_exists('formId', $field) ) {
             return $field_content;
+        }
 
         // Current Field Attributes
         $form_id = $field['formId'];
         $field_id = $field['id'];
         $input_type = isset($field['inputType']) && !empty($field['inputType']) ? $field['inputType'] : $field['type'];
+
+        if ('html' === $input_type) {
+            return $field_content;
+        }
+
         $field_uid = $this->is_form_editor() ? "input_{$field_id}" : "input_{$form_id}_{$field_id}";
 
         // Flag to check whether to process field placeholders
         $process_placeholders = $this->is_gravityforms_html5_enabled();
 
         $this->log("original field content", $field_content);
-        
+
         // Handle Field Content Encoding
         $encoding = mb_detect_encoding( $field_content );
         if ($encoding != "UTF-8")
@@ -474,8 +480,8 @@ class GFHtml5Placeholders {
         // Disable libxml error output while we are processing html
         $use_errors = libxml_use_internal_errors(true);
 
-        // Prepare Dom Document and XPath       
-        $doc = new DomDocument();   
+        // Prepare Dom Document and XPath
+        $doc = new DomDocument();
         $doc->preserveWhiteSpace = false; // needs to be before loading, to have any effect
         $doc->formatOutput = false;
        @$doc->loadHTML( $field_content_wrapped );
@@ -515,11 +521,11 @@ class GFHtml5Placeholders {
                     }
                 }
 
-            
+
             break;
             case 'email':
 
-                // Process Email 
+                // Process Email
                 if( $process_placeholders && isset($field['placeholder']) && !empty($field['placeholder'])){
                     if( $this->is_form_editor() && $input = (( $result = $xpath->query("//input[@name='{$field_uid}']")) ? $result->item(0) : null )){
                         $input->setAttribute('placeholder', esc_attr($field['placeholder']));
@@ -540,10 +546,10 @@ class GFHtml5Placeholders {
                         $label->setAttribute('style', trim("{$styles} display:none;"));
                     }
                 }
-                
+
                 if ( isset($field['emailConfirmEnabled']) && $field['emailConfirmEnabled']) {
-                
-                    // Process Confirm 
+
+                    // Process Confirm
                     if( $process_placeholders && isset($field['placeholderEmailConfirm']) && !empty($field['placeholderEmailConfirm'] )){
                         if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_2']")) ? $result->item(0) : null ) ){
                             $input->setAttribute('placeholder', esc_attr($field['placeholderEmailConfirm']));
@@ -567,15 +573,15 @@ class GFHtml5Placeholders {
             case 'name':
 
                 $name_format = isset($field['nameFormat']) && !empty($field['nameFormat']) ? $field['nameFormat'] : 'normal';
-                switch ( $name_format ){              
+                switch ( $name_format ){
                     case 'simple':
-                    
+
                         if( $process_placeholders && isset($field['placeholder']) && !empty($field['placeholder'])){
                             if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}']")) ? $result->item(0) : null ) ){
                                 $input->setAttribute('placeholder', esc_attr($field['placeholder']));
                             }
                         }
-                    
+
                     break; // break simple
                     case 'normal':
                     case 'extended':
@@ -600,7 +606,7 @@ class GFHtml5Placeholders {
                             }
                         }
 
-                        // Process Name First 
+                        // Process Name First
                         if( $process_placeholders && isset($field['placeholderNameFirst']) && !empty($field['placeholderNameFirst'] )){
                             if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_3']")) ? $result->item(0) : null ) ){
                                 $input->setAttribute('placeholder', esc_attr($field['placeholderNameFirst']));
@@ -657,14 +663,14 @@ class GFHtml5Placeholders {
                             }
 
                         }
-                    
+
                     break; // break normal & extended
-                
+
                 } // end switch
-            
+
             break; // break name
             case 'address':
-                    
+
                 // Process Address Line 1
                 if( $process_placeholders && isset($field['placeholderAddressStreet']) && !empty($field['placeholderAddressStreet'] )) {
                     if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_1']")) ? $result->item(0) : null ) ){
@@ -682,8 +688,8 @@ class GFHtml5Placeholders {
                         $label->setAttribute('style', trim("{$styles} display:none;"));
                     }
                 }
-                
-                // Process Address Line 2 
+
+                // Process Address Line 2
                 if (!isset($field['hideAddress2']) || false === $field['hideAddress2']) {
                     if( $process_placeholders && isset($field['placeholderAddressStreet2']) && !empty($field['placeholderAddressStreet2'] )) {
                         if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_2']")) ? $result->item(0) : null ) ){
@@ -702,7 +708,7 @@ class GFHtml5Placeholders {
                         }
                     }
                 }
-                
+
                 // Process Address City
                 if( $process_placeholders && isset($field['placeholderAddressCity']) && !empty($field['placeholderAddressCity'] )) {
                     if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_3']")) ? $result->item(0) : null ) ){
@@ -720,8 +726,8 @@ class GFHtml5Placeholders {
                         $label->setAttribute('style', trim("{$styles} display:none;"));
                     }
                 }
-                
-                // Process Address State / Province 
+
+                // Process Address State / Province
                 if (!isset($field['hideState']) || false === $field['hideState']) {
                     if( $process_placeholders && isset($field['placeholderAddressState']) && !empty($field['placeholderAddressState'] )) {
                         if ( $this->is_form_editor() ) {
@@ -782,10 +788,10 @@ class GFHtml5Placeholders {
 
             break; // break address
             case 'date':
-                
+
                 $date_type = isset($field['dateType']) && !empty($field['dateType']) ? $field['dateType'] : 'datepicker';
                 switch ( $date_type ) {
-                    
+
                     case 'datepicker':
 
                         // Process Date Picker
@@ -877,7 +883,7 @@ class GFHtml5Placeholders {
                                 }
                             }
                         }
-                        
+
                         // Process Date Year
                         if( $process_placeholders && isset($field['placeholderDateYear']) && !empty($field['placeholderDateYear'] )) {
                             if ( $this->is_form_editor() ) {
@@ -918,7 +924,7 @@ class GFHtml5Placeholders {
                     break; // break datefield
 
                 } // end switch
-                
+
             break; // break date
             case 'time':
 
@@ -939,7 +945,7 @@ class GFHtml5Placeholders {
                         $label->setAttribute('style', trim("{$styles} display:none;"));
                     }
                 }
-            
+
                 // Process Time Minute
                 if( $process_placeholders && isset($field['placeholderTimeMinute']) && !empty($field['placeholderTimeMinute'] )){
                     if( $input = (( $result = $xpath->query("//input[@id='{$field_uid}_2']")) ? $result->item(0) : null ) ){
@@ -957,12 +963,12 @@ class GFHtml5Placeholders {
                         $label->setAttribute('style', trim("{$styles} display:none;"));
                     }
                 }
-            
+
             break; // break time
             case 'product':
             case 'singleproduct':
             case 'calculation':
-                
+
                 $product_disable_quantity = isset($field['disableQuantity']) && $field['disableQuantity'];
                 if( $process_placeholders && !$product_disable_quantity && isset($field['placeholder']) && !empty($field['placeholder'] )) {
                     if ( $this->is_form_editor() ) {
@@ -978,7 +984,7 @@ class GFHtml5Placeholders {
 
             break; // break product, singleproduct & caclulation
             case 'quantity':
-                
+
                 $quantity_type = isset($field['inputType']) && !empty($field['inputType']) ? $field['inputType'] : 'number';
                 switch ($quantity_type) {
                     case 'number':
@@ -993,18 +999,18 @@ class GFHtml5Placeholders {
 
             break; // break quantity
         }
-        
+
         $field_content = $doc->SaveHTML();
 
         // Remove our html wrapper from processed field
-        $field_content = str_replace( 
-            array('<html>', '</html>', '<head>', '</head>', "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">", '<body>', '</body>'), 
+        $field_content = str_replace(
+            array('<html>', '</html>', '<head>', '</head>', "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">", '<body>', '</body>'),
             array('', '', '', '', '', '', ''),
             $field_content
         );
 
         $field_content = trim(preg_replace('/^<!DOCTYPE.+?>/', '', $field_content));
- 
+
         // Check if we are currently on ajax and fix double quotes to single.
         if( defined('RG_CURRENT_PAGE') && RG_CURRENT_PAGE == 'admin-ajax.php' ) {
 
@@ -1019,9 +1025,9 @@ class GFHtml5Placeholders {
             }
 
         }
-        
+
         $this->log("processed field content", $field_content);
-        
+
         // Renable libxml error handling
         libxml_use_internal_errors($use_errors);
 
@@ -1043,7 +1049,7 @@ class GFHtml5Placeholders {
         }else {
             $call_mode = "NORMAL";
         }
-        
+
         $user_mode = defined('IS_ADMIN') ? "ADMIN"  : "NORMAL";
 
         $timestamp = date("Y-m-d H:i:s");
@@ -1057,7 +1063,7 @@ class GFHtml5Placeholders {
                 case 'object':
                     $log .= print_r($attachment, true);
                     break;
-                
+
                 default:
                     $log .= (string) $attachment;
                     break;
@@ -1098,14 +1104,14 @@ class GFHtml5Placeholders {
     * @return string
     */
     protected function get_template_part( $template_filename, $view_data = null, $echo = false ) {
-     
+
         ( $view_data ) ? extract( $view_data ) : null;
-     
+
         ob_start();
         include ( $this->get_base_path() . "templates" . DIRECTORY_SEPARATOR . $template_filename );
         $template = ob_get_contents();
         ob_end_clean();
-        
+
         if ( $echo )
             echo $template;
         else
@@ -1170,45 +1176,5 @@ class GFHtml5Placeholders {
 }
 
 new GFHtml5Placeholders();
-
-endif;
-
-if(!function_exists('dflt')):
-function dflt( $object , $property = null, $default = "" ){
-
-    $type = gettype($object);
-    switch ($type) {
-        
-        case 'NULL':
-            return $default;
-            break;
-
-        case 'object':
-            if(!is_string( $property ))
-                return $object;
-
-            if(isset( $object->$property ))
-                return $object->$property;
-            
-            break;
-        
-        case 'array':
-            if(!is_string( $property ))
-                return $object;
-
-            if(array_key_exists( $property, $object ))
-                return $object[$property];
-        
-            break;
-
-        default:
-            return $object;
-            break;
-
-    }
-
-    return $default;
-
-}
 
 endif;

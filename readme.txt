@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.7
+Stable tag: 2.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,13 +11,15 @@ This plugin adds native HTML5 placeholder support to Gravity Forms' fields with 
 
 == Description ==
 
+**Important Notice:** Built-in HTML5 placeholders are coming to Gravity Forms v.1.9 which is currently in beta 3. The 1.9 placeholder schema is not compatible with the one we use and we are working on a solution so that you can port your forms to ver. 1.9 without having to re edit your forms.
+
 The plugin extends the default Gravity Forms form editor to support native HTML5 placeholders and label management.
 
-It allows you to define placeholders for a wide variety of build-in fields and to customize field labels & sublabels by either overriding the default with your own and/or allowing you to hide them individually.  
+It allows you to define placeholders for a wide variety of build-in fields and to customize field labels & sublabels by either overriding the default with your own and/or allowing you to hide them individually.
 
 Javascript fallback is used for old browsers that don't support the HTML5 placeholder attribute.
 
-It is fully compatible with WPML for placeholder and label translation using the Gravity Forms Multilingual plugin. 
+It is fully compatible with WPML for placeholder and label translation using the Gravity Forms Multilingual plugin.
 
 = Supported Standard Fields =
 * Single Line Text
@@ -49,7 +51,7 @@ It is fully compatible with WPML for placeholder and label translation using the
 This plugin requires prior installation and activation of [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above.
 
 = Tested =
-Up to Gravity Forms plugin ver. 1.8.12.6
+Up to Gravity Forms plugin ver. 1.8.18
 
 == Installation ==
 
@@ -68,6 +70,9 @@ Up to Gravity Forms plugin ver. 1.8.12.6
 
 == Changelog ==
 
+= 2.7.1 =
+* Fixed html field parsing.
+
 = 2.7 =
 * Added support for Product and Quantity pricing fields
 * Added support for Tags and Custom Field post fields
@@ -76,7 +81,7 @@ Up to Gravity Forms plugin ver. 1.8.12.6
 
 = 2.6 =
 * Fixed scripts not loading when Gravity Forms no-conflict mode was enabled
-* Added required fields that have hidden labels are now marked with a red asterisk using css background ( .gfield_contains_required.gfield_hidden_label ) to denote that they are required 
+* Added required fields that have hidden labels are now marked with a red asterisk using css background ( .gfield_contains_required.gfield_hidden_label ) to denote that they are required
 * Added 'gform_placeholders_disable_css' filter to conditionally load the css on frontend that depends by default on gravity forms settings output css option
 * When Gravity Forms Output HTML5 setting is set to no, field placeholder settings are not rendered in form editor and only label management features are available
 
@@ -92,7 +97,7 @@ Up to Gravity Forms plugin ver. 1.8.12.6
 * Fixed section break field label visibility
 * Fixed name field label placeholder not rendering when nameFormat empty
 * Fixed field label hidden css to allow for margin
-* Added minified versions of scripts 
+* Added minified versions of scripts
 
 = 2.4 =
 * Added support for Title, Body and Excerpt post fields
