@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.7.1
+Stable tag: 2.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,7 +51,7 @@ It is fully compatible with WPML for placeholder and label translation using the
 This plugin requires prior installation and activation of [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above.
 
 = Tested =
-Up to Gravity Forms plugin ver. 1.8.18
+Up to Gravity Forms plugin ver. 1.8.19
 
 == Installation ==
 
@@ -69,6 +69,9 @@ Up to Gravity Forms plugin ver. 1.8.18
 4. Editing an International Address Field
 
 == Changelog ==
+
+= 2.7.2 =
+* Changed placeholders fallback script to Placeholders.js v.3.0.2 by James Allardice that is not dependent on jQuery.
 
 = 2.7.1 =
 * Fixed html field parsing.
