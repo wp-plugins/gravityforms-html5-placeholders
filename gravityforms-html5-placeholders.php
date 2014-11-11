@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms HTML5 Placeholders
 Plugin URI: http://www.isoftware.gr/wordpress/plugins/gravityforms-html5-placeholders
 Description: Adds native HTML5 placeholder support to Gravity Forms' fields with javascript fallback. Javascript & jQuery are required.
-Version: 2.7.2
+Version: 2.7.3
 Author: iSoftware
 Author URI: http://www.isoftware.gr
 
@@ -29,7 +29,7 @@ if (!class_exists('GFHtml5Placeholders')):
 
 class GFHtml5Placeholders
 {
-    protected $_version = "2.7.2";
+    protected $_version = "2.7.3";
     protected $_min_gravityforms_version = "1.7";
     protected $_slug = "html5_placeholders";
     protected $_full_path = __FILE__;
@@ -254,6 +254,10 @@ class GFHtml5Placeholders
         // override the default gravity forms placeholders script
         wp_deregister_script('gform_placeholder');
         wp_register_script('gform_placeholder', "{$base_url}/js/Placeholders{$suffix}.js", null, '3.0.2');
+
+        if ($this->is_gravityforms_html5_enabled()) {
+            wp_enqueue_script('gform_placeholder');
+        }
 
         // register the placeholders css
         wp_register_style('gforms_placeholders_css', "{$base_url}/css/gravityforms-placeholders{$suffix}.css", array('gforms_formsmain_css'), $this->_version);

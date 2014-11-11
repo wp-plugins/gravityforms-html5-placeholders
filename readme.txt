@@ -3,7 +3,7 @@ Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 2.7.2
+Stable tag: 2.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,9 @@ Up to Gravity Forms plugin ver. 1.8.19
 4. Editing an International Address Field
 
 == Changelog ==
+
+= 2.7.3 =
+* Fixed placeholder.js fallback script not loading under certain circumstances.
 
 = 2.7.2 =
 * Changed placeholders fallback script to Placeholders.js v.3.0.2 by James Allardice that is not dependent on jQuery.
