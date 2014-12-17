@@ -2,7 +2,7 @@
 Contributors: isoftware
 Tags: forms, gravity, gravityforms, html5, wpml, jquery.placeholders.js, placeholders
 Requires at least: 3.5
-Tested up to: 4.0
+Tested up to: 4.1
 Stable tag: 2.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -11,7 +11,7 @@ This plugin adds native HTML5 placeholder support to Gravity Forms' fields with 
 
 == Description ==
 
-**Important Notice:** Built-in HTML5 placeholders are coming to Gravity Forms v.1.9 which is currently in beta 3. The 1.9 placeholder schema is not compatible with the one we use and we are working on a solution so that you can port your forms to ver. 1.9 without having to re edit your forms.
+**Important Notice:** Built-in HTML5 placeholders are coming to Gravity Forms v.1.9 which is currently in beta 5. The 1.9 placeholder schema is not compatible with the one we use and we are working on a solution so that you can port your forms to ver. 1.9 without having to re edit your forms.
 
 The plugin extends the default Gravity Forms form editor to support native HTML5 placeholders and label management.
 
@@ -51,7 +51,7 @@ It is fully compatible with WPML for placeholder and label translation using the
 This plugin requires prior installation and activation of [Gravity Forms](http://www.gravityforms.com/) plugin by [Rocketgenius](http://www.rocketgenius.com/) ver. 1.7 and above.
 
 = Tested =
-Up to Gravity Forms plugin ver. 1.8.19
+Up to Gravity Forms plugin ver. 1.8.20
 
 == Installation ==
 
