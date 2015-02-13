@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms HTML5 Placeholders
 Plugin URI: http://www.isoftware.gr/wordpress/plugins/gravityforms-html5-placeholders
 Description: Adds native HTML5 placeholder support to Gravity Forms' fields with javascript fallback. Javascript & jQuery are required.
-Version: 2.7.3
+Version: 2.7.4
 Author: iSoftware
 Author URI: http://www.isoftware.gr
 
@@ -29,8 +29,10 @@ if (!class_exists('GFHtml5Placeholders')):
 
 class GFHtml5Placeholders
 {
-    protected $_version = "2.7.3";
+    protected $_version = "2.7.4";
     protected $_min_gravityforms_version = "1.7";
+    protected $_max_gravityforms_version = "1.9";
+    protected $_min_wordpress_version    = '3.5';
     protected $_slug = "html5_placeholders";
     protected $_full_path = __FILE__;
     protected $_title = "Gravity Forms HTML5 Placeholders";
@@ -39,6 +41,9 @@ class GFHtml5Placeholders
 
     // define strings
     private $_strings = array();
+
+    // plugin warnings
+    protected $warnings = array();
 
     /**
      * Class constructor which hooks the instance into the WordPress init action
@@ -58,6 +63,32 @@ class GFHtml5Placeholders
     {
         // initialize our strings
         $this->_strings = (object) array(
+
+            // plugin warnings
+            'warnings' => array(
+
+                'wordpress_version' => sprintf(
+                    __( 'Gravity Forms HTML5 Placeholders require WordPress %s or greater. You must upgrade WordPress in order to use Gravity Forms HTML5 Placeholders', 'gf-html5-placeholders' ),
+                    $this->_min_wordpress_version
+                ),
+
+                'gf_missing' => sprintf(
+                    __( 'Gravity Forms HTML5 Placeholders is enabled but not effective. It requires %s in order to work.', 'gf-html5-placeholders' ),
+                    sprintf( '<a target="_blank" href="%s">%s</a>', 'http://www.gravityforms.com/', 'Gravity Forms' )
+                ),
+
+                'gf_version'  =>  sprintf(
+                    __( 'Gravity Forms HTML5 Placeholders is enabled but not effective. It requires %s version <strong>%s</strong> and above in order to work. <strong>Version %s is not yet supported.</strong>', 'gf-html5-placeholders' ),
+                    sprintf( '<a target="_blank" href="%s">%s</a>', 'http://www.gravityforms.com/', 'Gravity Forms' ),
+                    $this->_min_gravityforms_version,
+                    $this->_max_gravityforms_version
+                ),
+
+                'gf_html5_output' =>  sprintf(
+                    __( 'Gravity Forms HTML5 Placeholders requires Output HTML5 setting to be enabled in %s page.', 'gf-html5-placeholders' ),
+                    sprintf( '<a href="%s">%s</a>', admin_url('admin.php?page=gf_settings'), __( 'General Settings', 'gravityforms') )
+                ),
+            ),
 
             // general
             'labels' => (object) array(
@@ -163,16 +194,37 @@ class GFHtml5Placeholders
      */
     public function init()
     {
-        // load_plugin_textdomain($this->_slug, FALSE, $this->_slug . '/languages');
-        if ($this->is_gravityforms_supported()) {
-            if (defined('RG_CURRENT_PAGE') && RG_CURRENT_PAGE == 'admin-ajax.php') {
-                $this->init_ajax();
-            } else if (is_admin()) {
-                $this->init_admin();
-            } else {
-                $this->init_frontend();
-            }
+         // we use this hook to render our warnings
+        add_action( 'admin_notices', array( $this, 'render_warnings') );
+
+        // check if Wordpress version is supported
+        if( false === $this->is_wordpress_supported() ){
+            $this->warnings[] = $this->_strings->warnings['wp_version'];
+            return;
         }
+
+        // check if gravity forms is installed
+        if( false === $this->is_gravityforms_installed() ){
+            $this->warnings[] = $this->_strings->warnings['gf_missing'];
+            return;
+        }
+
+        // check if gravity forms is supported
+        if ( false === $this->is_gravityforms_supported() ){
+            $this->warnings[] = $this->_strings->warnings['gf_version'];
+            return;
+        }
+
+        // load_plugin_textdomain($this->_slug, FALSE, $this->_slug . '/languages');
+
+        if (defined('RG_CURRENT_PAGE') && RG_CURRENT_PAGE == 'admin-ajax.php') {
+            $this->init_ajax();
+        } else if (is_admin()) {
+            $this->init_admin();
+        } else {
+            $this->init_frontend();
+        }
+
     }
 
     /**
@@ -215,6 +267,12 @@ class GFHtml5Placeholders
 
             // we use this filter to manipulate our own field classes
             add_filter('gform_field_css_class', array($this, 'get_field_css_class'), 10, 3);
+
+            // we use this to generate form editor warnings
+            if (false === $this->is_gravityforms_html5_enabled()) {
+                $this->warnings[] = $this->_strings->warnings['gf_html5_output'];
+            }
+
         }
 
         // we use this filter to provide translation support through WPML Gravity Forms Multilingual
@@ -1032,7 +1090,31 @@ class GFHtml5Placeholders
         return $field_content;
     }
 
+    /**
+    * Target of admin_notices action.
+    */
+    public function render_warnings()
+    {
+        global $pagenow;
+        if ( $pagenow === 'plugins.php' ){
+            foreach ( $this->warnings as $warning ){
+
+                $view_data = array(
+                    'message' => (object) array(
+                        'text' => $warning,
+                        'type' => 'error',
+                    ),
+                );
+
+                $this->get_template_part( 'gf-message.tmpl.php', $view_data, true );
+
+            }
+        }
+    }
+
     //--------------  helper functions  ---------------------------------------------------
+
+
 
     protected function log($message, $attachment = null)
     {
@@ -1161,7 +1243,7 @@ class GFHtml5Placeholders
      * @param $min_gravityforms_version
      * @return bool|mixed
      */
-    public function is_gravityforms_supported($min_gravityforms_version = "")
+    public function is_gravityforms_supported($min_gravityforms_version = "", $max_gravityforms_version = "")
     {
         if (isset($this->_min_gravityforms_version) &&
             empty($min_gravityforms_version)
@@ -1169,17 +1251,44 @@ class GFHtml5Placeholders
             $min_gravityforms_version = $this->_min_gravityforms_version;
         }
 
-        if (empty($min_gravityforms_version)) {
+        if (isset($this->_max_gravityforms_version) &&
+            empty($max_gravityforms_version)
+        ) {
+            $max_gravityforms_version = $this->_max_gravityforms_version;
+        }
+
+        if (empty($min_gravityforms_version) && empty($max_gravityforms_version)) {
             return true;
         }
 
         if (class_exists("GFCommon")) {
-            $is_correct_version = version_compare(GFCommon::$version, $min_gravityforms_version, ">=");
+            $is_correct_version = version_compare(GFCommon::$version, $min_gravityforms_version, ">=") && version_compare(GFCommon::$version, $max_gravityforms_version, "<");
             return $is_correct_version;
         }
 
         return false;
 
+    }
+
+    /**
+     * Checks whether the current version of WordPress is supported
+     *
+     * @param $min_wordpress_version
+     * @return bool|mixed
+     */
+    public function is_wordpress_supported( $min_wordpress_version = "" ){
+
+        if (isset($this->_min_wordpress_version) &&
+            empty($min_wordpress_version)
+        ) {
+            $min_wordpress_version = $this->_min_wordpress_version;
+        }
+
+        if (empty($min_wordpress_version)) {
+            return true;
+        }
+
+        return version_compare( get_bloginfo("version"), $min_wordpress_version, ">=" );
     }
 
 }
